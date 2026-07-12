@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+streamlit
+chromadb
+sentence-transformers
+PyMuPDF
+python-docx
+langdetect
+python-dotenv
+groq
+pydantic
+requests
+pytest
+pydantic-settings

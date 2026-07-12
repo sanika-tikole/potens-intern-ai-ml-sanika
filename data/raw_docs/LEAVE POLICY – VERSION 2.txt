@@ -1,0 +1,81 @@
+LEAVE POLICY – VERSION 2
+
+1. PURPOSE
+This revised leave policy defines leave eligibility, approval rules, leave categories, supporting documentation requirements, and disciplinary consequences related to unauthorized absence. It is intended to provide a structured and transparent framework for employees and interns while aligning leave administration with revised HR governance standards.
+
+2. APPLICABILITY
+This policy applies to:
+- Full-time employees
+- Employees on probation
+- Interns, where specifically stated
+- Employees on hybrid or remote arrangements, unless a separate arrangement supersedes this policy
+
+Third-party contractors and consultants are not covered unless their contract explicitly adopts this policy.
+
+3. GENERAL LEAVE RULES
+3.1 All leave requests must be submitted through the leave management portal.
+3.2 Leave should not be treated as approved until it is confirmed in the system by the reporting manager.
+3.3 Employees are expected to plan leave responsibly and ensure work handover where required.
+3.4 HR may review leave trends, suspicious patterns, or excessive unscheduled leave for compliance purposes.
+3.5 Managers may deny or reschedule non-essential leave if project delivery or customer commitments would be adversely affected.
+
+4. PLANNED LEAVE
+4.1 Planned leave includes any leave that is foreseeable and can reasonably be scheduled in advance.
+4.2 Employees must submit planned leave requests at least 5 working days in advance through the leave management portal.
+4.3 Planned leave is approved only after manager confirmation in the system.
+4.4 Where a team faces multiple overlapping leave requests, the manager may prioritize business continuity, client commitments, and critical project timelines while deciding approvals.
+4.5 Employees are encouraged to discuss long planned leave at least two weeks in advance where feasible.
+
+5. SICK LEAVE
+5.1 Sick leave may be availed for genuine illness, injury, or medical incapacity.
+5.2 Employees should inform the reporting manager as soon as possible on the day of absence.
+5.3 If sick leave extends beyond 3 consecutive working days, the employee must submit a medical certificate to HR within 72 hours of returning to work.
+5.4 HR may request additional medical documentation where the leave pattern suggests repeated misuse or where long absence needs verification.
+5.5 Sick leave approval may be regularized after submission of supporting medical records where required.
+
+6. CASUAL LEAVE
+6.1 Employees are eligible for 6 casual leave days per calendar year.
+6.2 Casual leave is intended for urgent personal matters, family needs, or short planned absence.
+6.3 Casual leave lapses at the end of the calendar year and cannot be carried forward.
+6.4 Casual leave exceeding 2 consecutive working days may require manager justification depending on team workload.
+
+7. EARNED LEAVE
+7.1 Employees are eligible for 12 earned leave days per calendar year.
+7.2 Earned leave may be used for planned vacations, personal work, family commitments, or recovery periods.
+7.3 A maximum of 7 earned leave days may be carried forward into the next calendar year.
+7.4 Carry-forward beyond the permitted limit is not allowed unless specifically approved by HR under exceptional circumstances.
+7.5 Employees are encouraged to spread earned leave through the year to avoid last-quarter operational pressure.
+
+8. LEAVE DURING PROBATION
+8.1 Employees on probation may avail casual leave and sick leave with manager approval.
+8.2 Earned leave becomes available only after probation is successfully completed and confirmed by HR.
+8.3 Frequent absence during probation may be taken into account during performance review and confirmation decisions.
+
+9. INTERNSHIP LEAVE
+9.1 Interns are eligible for 1 paid leave day per month.
+9.2 Any additional leave requires approval from both the mentor and HR and may be treated as unpaid depending on internship terms.
+9.3 Interns are expected to maintain regular communication with their mentor regarding absence.
+9.4 Unapproved absence may affect final evaluation, extension decisions, and certificate eligibility.
+
+10. BUSINESS-CRITICAL PERIODS
+10.1 During audit windows, major product releases, customer escalations, or other business-critical periods, managers may limit non-essential leave approvals.
+10.2 Emergency, medical, and compassionate cases will continue to be considered separately.
+10.3 Employees should coordinate early with the manager if they anticipate leave during a critical project milestone.
+
+11. ABSENCE WITHOUT APPROVAL
+11.1 Absence without informing the manager may be treated as unauthorized absence.
+11.2 Unapproved absence for more than 3 consecutive working days may trigger HR review and disciplinary action.
+11.3 Depending on the circumstances, the company may issue a warning, treat the period as loss of pay, or escalate the matter for misconduct review.
+
+12. LEAVE NEAR HOLIDAYS OR LONG WEEKENDS
+12.1 Leave requests around public holidays, festivals, and long weekends should be planned early.
+12.2 Managers may regulate approvals where multiple employees from the same team seek leave simultaneously.
+12.3 HR may review suspicious attendance patterns around holidays if misuse is suspected.
+
+13. RECORDS AND COMPLIANCE
+13.1 Leave balances and approvals are maintained in the HR leave system.
+13.2 Employees must verify that their leave status is updated correctly after approval.
+13.3 If a technical issue affects the leave portal, email approval from the reporting manager may be used temporarily and regularized later in the system.
+
+14. POLICY INTERPRETATION
+The HR department reserves the right to interpret this policy, issue clarifications, and approve exceptions in consultation with business leadership where necessary.

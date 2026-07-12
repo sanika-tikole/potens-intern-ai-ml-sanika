@@ -1,0 +1,59 @@
+INTERNSHIP HANDBOOK
+
+1. PURPOSE
+This handbook outlines the expectations, working norms, evaluation rules, attendance expectations, leave guidance, and conduct standards applicable to interns. It is intended to help interns understand how the internship operates and what is required for successful completion.
+
+2. INTERNSHIP DURATION
+2.1 The standard internship duration is 6 months unless otherwise stated in the internship offer letter.
+2.2 Any extension of the internship is subject to business need, mentor recommendation, and HR approval.
+2.3 Internship completion is not a guarantee of full-time employment.
+
+3. WORKING HOURS
+3.1 Interns are expected to follow the standard office timing of 9:30 AM to 6:30 PM on working days unless assigned to a special project or approved flexible arrangement.
+3.2 Interns are expected to be available during team collaboration hours and attend required meetings, reviews, and check-ins.
+3.3 Remote interns must remain reachable on official communication channels during expected working hours.
+
+4. ATTENDANCE REQUIREMENT
+4.1 Interns must maintain at least 85 percent attendance unless a different threshold is specified in the internship offer letter.
+4.2 Repeated absence without approval may affect performance review, stipend release, internship extension, and certificate eligibility.
+4.3 The mentor and HR may review attendance records during the internship.
+
+5. LEAVE FOR INTERNS
+5.1 Interns are eligible for leave only as permitted by the applicable leave policy or internship agreement.
+5.2 If the internship agreement does not explicitly grant paid leave, any approved absence may be treated as unpaid.
+5.3 Interns must notify both the mentor and the reporting manager before taking leave wherever possible.
+5.4 Long unplanned absence may require HR review.
+
+6. PERFORMANCE REVIEWS
+6.1 Intern performance is reviewed periodically by the assigned mentor and, where relevant, the project manager.
+6.2 Reviews may consider learning ability, ownership, communication, task completion, punctuality, attendance, and collaboration.
+6.3 Poor performance may lead to corrective feedback, project reassignment, internship non-extension, or non-issuance of a recommendation.
+
+7. LEARNING AND DELIVERABLE EXPECTATIONS
+7.1 Interns are expected to complete assigned tasks within agreed timelines and ask for clarification when blocked.
+7.2 Interns should maintain project notes, submit work updates, and follow coding, documentation, or process standards communicated by the team.
+7.3 Repeated failure to complete assigned work without valid reason may affect evaluation.
+
+8. CODE OF CONDUCT
+8.1 Interns are expected to behave professionally with colleagues, mentors, managers, and clients.
+8.2 Harassment, abusive behavior, repeated misconduct, confidentiality breach, or deliberate policy violation may lead to disciplinary action or internship termination.
+8.3 Interns must follow all applicable HR, IT, information security, and workplace conduct policies.
+
+9. CONFIDENTIALITY AND DATA HANDLING
+9.1 Interns may receive access to internal tools, repositories, documents, and datasets strictly for work purposes.
+9.2 Confidential information must not be shared outside the company without authorization.
+9.3 Use of personal storage, unauthorized sharing of code, or copying internal documents externally may be treated as serious misconduct.
+
+10. STIPEND AND ADMINISTRATIVE MATTERS
+10.1 If the internship includes a stipend, payment terms will be governed by the internship offer letter or stipend agreement.
+10.2 Attendance, performance, and compliance with company processes may affect stipend release where explicitly stated.
+10.3 Interns are responsible for maintaining bank and contact details accurately with HR if stipend processing is applicable.
+
+11. CERTIFICATE ELIGIBILITY
+11.1 Internship completion certificates are issued only if the intern successfully completes assigned work, maintains expected conduct, and meets attendance requirements.
+11.2 HR may withhold or defer certificate issuance where the internship is incomplete, disciplinary review is pending, or attendance conditions are not met.
+
+12. REPORTING STRUCTURE
+12.1 Each intern is assigned a mentor and may also report to a project manager depending on the project structure.
+12.2 The mentor is the first point of contact for technical guidance, performance feedback, and learning support.
+12.3 HR may be contacted for policy questions, attendance issues, stipend clarification, or workplace concerns.
