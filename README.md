@@ -266,10 +266,13 @@ Add your final screenshots here before submission.
 
 ### Home / Ask Questions
 
-![Ask Questions screenshot](docs/screenshots/ask-questions.png)
+<img width="1122" height="1084" alt="image" src="https://github.com/user-attachments/assets/f22c19a7-e2ca-4aa6-8a95-407c59a0f7a9" />
+<img width="1134" height="1072" alt="image" src="https://github.com/user-attachments/assets/166612f3-6844-4586-a2d5-799b1a5766af" />
+<img width="1124" height="1084" alt="image" src="https://github.com/user-attachments/assets/7a8dbee1-09e6-481b-a474-4680af968cdf" />
 
 ### Contradiction Checker
 
+<<<<<<< HEAD
 ![Contradiction Checker screenshot](docs/screenshots/contradiction-checker.png)
 
 
@@ -285,6 +288,10 @@ Before submitting, verify the following:
 5. The UI opens correctly and both tabs work.
 6. Screenshots are added in the section above.
 7. Record a short Loom demo showing ingestion, `/ask`, and `/contradict`.
+=======
+<img width="1110" height="1076" alt="image" src="https://github.com/user-attachments/assets/b2f904d4-76dc-40ed-878f-5ae080102b27" />
+<img width="1126" height="1106" alt="image" src="https://github.com/user-attachments/assets/6086b84b-9406-40c1-b577-edf4c2687d4e" />
+>>>>>>> b4941eebbbf92a3ae6dfa1bfc46649fb77779f91
 
 ## 18. Loom Demo Flow
 
