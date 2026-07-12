@@ -272,9 +272,7 @@ Add your final screenshots here before submission.
 
 ![Contradiction Checker screenshot](docs/screenshots/contradiction-checker.png)
 
-### API Docs / Terminal
 
-![API screenshot](docs/screenshots/api.png)
 
 ## 17. Submission Checklist
 

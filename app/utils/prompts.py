@@ -14,7 +14,13 @@ Original question: {question_original}
 
 Context:
 {context}
-
+- Answer the user's question directly.
+- Use your own words while preserving the exact meaning.
+- Do NOT copy sentences verbatim from the context.
+- Do NOT include clause numbers, section numbers, headings, page numbers, or document formatting.
+- Do NOT start with phrases like "According to the policy", "Section 5.1", or "The document states".
+- If the context provides only a partial answer, answer only what is supported.
+- Keep the answer concise: 1–3 sentences, maximum 60 words.
 Return a concise, natural-sounding answer in 1-3 sentences.
 Do not copy lines verbatim from the context.
 Do not quote the document line by line or reproduce section headers.
