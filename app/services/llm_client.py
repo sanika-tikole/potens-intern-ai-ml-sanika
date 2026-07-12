@@ -15,7 +15,8 @@ except ImportError:  # pragma: no cover - optional dependency fallback
 
 DEFAULT_GROQ_MODEL = "llama-3.1-8b-instant"
 DEFAULT_TEMPERATURE = 0.1
-DEFAULT_MAX_TOKENS = 800
+DEFAULT_MAX_TOKENS = 500
+DEFAULT_REQUEST_TIMEOUT = 30.0
 
 
 @dataclass(slots=True)
@@ -29,7 +30,7 @@ def _get_client(api_key: str):
     if Groq is None or not api_key:
         return None
     try:
-        return Groq(api_key=api_key)
+        return Groq(api_key=api_key, timeout=DEFAULT_REQUEST_TIMEOUT)
     except Exception:
         return None
 

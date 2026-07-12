@@ -6,6 +6,7 @@ from functools import lru_cache
 from importlib import import_module
 from pathlib import Path
 from typing import Any
+from time import perf_counter
 
 from app.config import Settings, settings
 from app.utils.errors import RetrievalError
@@ -187,6 +188,7 @@ def retrieve(query: str, top_k: int = 4, doc_id: str | None = None) -> list[dict
     if not query or not query.strip():
         return []
 
+    started_at = perf_counter()
     logger.info("retriever_query query=%r top_k=%d doc_id=%s", query, top_k, doc_id)
 
     collection = _get_collection()
@@ -194,7 +196,9 @@ def retrieve(query: str, top_k: int = 4, doc_id: str | None = None) -> list[dict
         logger.info("retriever_result_count=0 reason=no_collection")
         return []
 
+    embedding_started = perf_counter()
     query_embedding = _encode_query(query)
+    logger.info("retriever_timing query_embedding_seconds=%.3f", perf_counter() - embedding_started)
     if query_embedding is None:
         logger.info("retriever_result_count=0 reason=query_embedding_unavailable")
         return []
@@ -237,6 +241,7 @@ def retrieve(query: str, top_k: int = 4, doc_id: str | None = None) -> list[dict
         chunks.append(chunk)
 
     logger.info("retriever_result_count=%d", len(chunks))
+    logger.info("retriever_timing total_seconds=%.3f", perf_counter() - started_at)
     for index, chunk in enumerate(chunks, start=1):
         logger.debug(
             "retriever_chunk_%d source_file=%s doc_id=%s chunk_id=%s page_no=%s preview=%s",

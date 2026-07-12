@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+from time import perf_counter
 
 from app.config import settings
 from app.schemas.api_models import AskResponse
@@ -186,6 +187,7 @@ def _rank_relevant_chunks(question: str, retrieved_chunks: list[dict[str, object
 def answer_question(question: str) -> AskResponse:
     validated_question = _validate_question(question)
     question_en, original_language = normalize_query_to_english(validated_question)
+    started_at = perf_counter()
 
     logger.info(
         "ask_service incoming_question=%r detected_language=%s normalized_question=%r",
@@ -194,7 +196,9 @@ def answer_question(question: str) -> AskResponse:
         question_en,
     )
 
+    retrieval_started = perf_counter()
     retrieved_chunks = retrieve(question_en, top_k=settings.top_k)
+    logger.info("ask_service_timing retrieval_seconds=%.3f", perf_counter() - retrieval_started)
     retrieved_chunks = _rank_relevant_chunks(question_en, retrieved_chunks)
     logger.info("ask_service retrieved_chunks=%d", len(retrieved_chunks))
     for index, chunk in enumerate(retrieved_chunks, start=1):
@@ -233,7 +237,9 @@ def answer_question(question: str) -> AskResponse:
             citations=citations,
         )
 
+    prompt_started = perf_counter()
     prompt = build_qa_prompt(question_en, retrieved_chunks, target_language=original_language, original_language=original_language)
+    logger.info("ask_service_timing prompt_build_seconds=%.3f", perf_counter() - prompt_started)
     logger.debug("ask_service_prompt preview=%s", prompt[:1500])
     
     # Improved system prompt for better language-specific responses
@@ -246,11 +252,13 @@ def answer_question(question: str) -> AskResponse:
     else:
         system_prompt = "You answer only from the provided context and never use outside knowledge."
     
+    llm_started = perf_counter()
     answer_en = generate_text(
         prompt,
         system_prompt=system_prompt,
         temperature=0.0,
     )
+    logger.info("ask_service_timing llm_seconds=%.3f", perf_counter() - llm_started)
     logger.debug("ask_service_raw_llm_response preview=%s", answer_en[:1500])
 
     if _is_unsupported_answer(answer_en):
@@ -284,6 +292,7 @@ def answer_question(question: str) -> AskResponse:
     logger.debug("ask_service_final_answer preview=%s", answer[:1500])
     citations = make_citations(retrieved_chunks)
     logger.debug("ask_service_returned_citations=%s", citations)
+    logger.info("ask_service_timing total_seconds=%.3f", perf_counter() - started_at)
     return AskResponse(
         question=validated_question,
         answer=answer,
