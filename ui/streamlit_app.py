@@ -9,8 +9,7 @@ import streamlit as st
 try:
     API_BASE_URL = st.secrets["POLICYLENS_API_BASE_URL"]
 except Exception:
-    st.error("Missing Streamlit secret: POLICYLENS_API_BASE_URL. Add it to .streamlit/secrets.toml.")
-    st.stop()
+    API_BASE_URL = "http://localhost:8000"
 
 st.set_page_config(page_title="PolicyLens", page_icon="PL", layout="wide")
 
