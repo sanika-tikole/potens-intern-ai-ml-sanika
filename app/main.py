@@ -11,6 +11,15 @@ from app.routes.ingest import router as ingest_router
 def create_app() -> FastAPI:
     app = FastAPI(title=settings.app_title, description=settings.app_description)
 
+    @app.get("/")
+    def root() -> dict[str, str]:
+        return {
+            "message": "PolicyLens backend is running.",
+            "health": "/health",
+            "ask": "/ask",
+            "contradict": "/contradict",
+        }
+
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
