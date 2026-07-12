@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from importlib import import_module
@@ -132,6 +133,67 @@ def _distance_to_score(distance: float | None) -> float:
     return max(0.0, 1.0 - distance)
 
 
+def _chunk_relevance_score(query: str, chunk: dict[str, Any]) -> int:
+    query_terms = {
+        token
+        for token in re.findall(r"[a-z0-9]+", query.lower())
+        if len(token) > 2
+    }
+    chunk_text = " ".join(
+        str(chunk.get(field, ""))
+        for field in ("source_file", "doc_id", "text")
+    ).lower()
+    chunk_terms = {
+        token
+        for token in re.findall(r"[a-z0-9]+", chunk_text)
+        if len(token) > 2
+    }
+    overlap = len(query_terms & chunk_terms)
+    bonus = 0
+    if any(keyword in chunk_text for keyword in ("leave", "attendance", "intern", "reimbursement", "grievance")):
+        bonus += 2
+    if any(token in chunk_terms for token in query_terms if token.isdigit()):
+        bonus += 1
+    return overlap * 2 + bonus
+
+
+def _retrieve_lexical(query: str, collection, top_k: int, doc_id: str | None) -> list[dict[str, Any]]:
+    where: dict[str, Any] | None = None
+    if doc_id:
+        where = {"doc_id": {"$eq": doc_id}}
+
+    try:
+        results = collection.get(where=where, include=["documents", "metadatas"])
+    except Exception as exc:
+        logger.exception("retriever_lexical_fetch_failed query=%r doc_id=%s", query, doc_id)
+        raise RetrievalError(f"Lexical retrieval failed: {exc}") from exc
+
+    ids = results.get("ids", []) or []
+    documents = results.get("documents", []) or []
+    metadatas = results.get("metadatas", []) or []
+
+    chunks: list[dict[str, Any]] = []
+    for chunk_id, text, metadata in zip(ids, documents, metadatas):
+        metadata = metadata or {}
+        page_no = _to_int(metadata.get("page_no", metadata.get("page")))
+        chunk = {
+            "doc_id": str(metadata.get("doc_id", doc_id or "unknown")),
+            "source_file": str(metadata.get("source_file", "unknown")),
+            "page_no": page_no,
+            "chunk_id": str(metadata.get("chunk_id", chunk_id)),
+            "text": str(text or ""),
+            "score": 0.0,
+            "distance": None,
+        }
+        if "source_type" in metadata:
+            chunk["source_type"] = str(metadata.get("source_type", "unknown"))
+        chunk["score"] = float(_chunk_relevance_score(query, chunk))
+        chunks.append(chunk)
+
+    chunks.sort(key=lambda item: (float(item.get("score", 0.0) or 0.0), str(item.get("chunk_id", ""))), reverse=True)
+    return chunks[: max(1, int(top_k))]
+
+
 def _get_collection():
     try:
         chromadb = import_module("chromadb")
@@ -195,6 +257,23 @@ def retrieve(query: str, top_k: int = 4, doc_id: str | None = None) -> list[dict
     if collection is None:
         logger.info("retriever_result_count=0 reason=no_collection")
         return []
+
+    if not settings.use_embeddings:
+        lexical_started = perf_counter()
+        chunks = _retrieve_lexical(query, collection, top_k, doc_id)
+        logger.info("retriever_timing lexical_seconds=%.3f", perf_counter() - lexical_started)
+        logger.info("retriever_result_count=%d", len(chunks))
+        for index, chunk in enumerate(chunks, start=1):
+            logger.debug(
+                "retriever_chunk_%d source_file=%s doc_id=%s chunk_id=%s page_no=%s preview=%s",
+                index,
+                chunk.get("source_file"),
+                chunk.get("doc_id"),
+                chunk.get("chunk_id"),
+                chunk.get("page_no"),
+                str(chunk.get("text", ""))[:200].replace("\n", " "),
+            )
+        return chunks
 
     embedding_started = perf_counter()
     query_embedding = _encode_query(query)

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     chunk_size: int = 800
     chunk_overlap: int = 120
     top_k: int = 4
+    use_embeddings: bool = False
     supported_languages: str = "en,hi,mr"
     app_title: str = "PolicyLens"
     app_description: str = (
