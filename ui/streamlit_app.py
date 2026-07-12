@@ -138,8 +138,20 @@ st.markdown(
 
 def _call_api(path: str, payload: dict[str, Any]) -> dict[str, Any]:
     response = requests.post(f"{API_BASE_URL}{path}", json=payload, timeout=90)
-    response.raise_for_status()
-    return response.json()
+    if response.ok:
+        return response.json()
+
+    error_detail: str
+    try:
+        body = response.json()
+        error_detail = str(body.get("detail") or body)
+    except Exception:
+        error_detail = response.text.strip() or response.reason
+
+    raise requests.HTTPError(
+        f"{response.status_code} {response.reason}: {error_detail}",
+        response=response,
+    )
 
 
 def _render_citations(citations: list[dict[str, Any]], empty_message: str) -> None:
@@ -183,8 +195,18 @@ with right:
                 health.raise_for_status()
                 health_payload = health.json()
             st.success(f"Backend is healthy: {health_payload.get('status', 'ok')}")
-        except requests.RequestException:
-            st.error(f"Backend is unavailable at {API_BASE_URL}. Check the deployed API URL and try again.")
+        except requests.HTTPError as exc:
+            response = getattr(exc, "response", None)
+            if response is not None:
+                try:
+                    detail = response.json().get("detail")
+                except Exception:
+                    detail = response.text.strip() or response.reason
+                st.error(f"Backend responded with {response.status_code}: {detail}")
+            else:
+                st.error(f"Backend request failed: {exc}")
+        except requests.RequestException as exc:
+            st.error(f"Backend is unavailable at {API_BASE_URL}. {exc}")
 
 ask_tab, contradiction_tab = st.tabs(["Ask Questions", "Contradiction Checker"])
 
@@ -213,8 +235,18 @@ with ask_tab:
                     unsafe_allow_html=True,
                 )
                 _render_citations(result.get("citations", []), "No citations were returned for this answer.")
-            except requests.RequestException:
-                st.error(f"Backend request failed. Make sure the API is reachable at {API_BASE_URL}.")
+            except requests.HTTPError as exc:
+                response = getattr(exc, "response", None)
+                if response is not None:
+                    try:
+                        detail = response.json().get("detail")
+                    except Exception:
+                        detail = response.text.strip() or response.reason
+                    st.error(f"Backend responded with {response.status_code}: {detail}")
+                else:
+                    st.error(f"Backend request failed: {exc}")
+            except requests.RequestException as exc:
+                st.error(f"Backend request failed. Make sure the API is reachable at {API_BASE_URL}. {exc}")
 
 with contradiction_tab:
     st.markdown('<div class="panel">', unsafe_allow_html=True)
@@ -266,5 +298,15 @@ with contradiction_tab:
                     ],
                     "No evidence chunks were returned.",
                 )
-            except requests.RequestException:
-                st.error(f"Backend request failed. Make sure the API is reachable at {API_BASE_URL}.")
+            except requests.HTTPError as exc:
+                response = getattr(exc, "response", None)
+                if response is not None:
+                    try:
+                        detail = response.json().get("detail")
+                    except Exception:
+                        detail = response.text.strip() or response.reason
+                    st.error(f"Backend responded with {response.status_code}: {detail}")
+                else:
+                    st.error(f"Backend request failed: {exc}")
+            except requests.RequestException as exc:
+                st.error(f"Backend request failed. Make sure the API is reachable at {API_BASE_URL}. {exc}")
