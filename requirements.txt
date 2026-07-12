@@ -12,3 +12,4 @@ pydantic
 requests
 pytest
 pydantic-settings
+tomli

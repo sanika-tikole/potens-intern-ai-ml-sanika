@@ -2,10 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable
-
-import chromadb
-import fitz
-from docx import Document
+from importlib import import_module
 
 from app.config import Settings, settings
 from app.services.retriever import ChromaRetriever
@@ -21,6 +18,7 @@ class IngestionService:
 
     def ingest_all(self) -> dict[str, object]:
         self.settings.ensure_directories()
+        chromadb = import_module("chromadb")
         client = chromadb.PersistentClient(path=str(self.settings.vectorstore_dir))
         try:
             client.delete_collection(self.settings.chroma_collection_name)
@@ -77,6 +75,7 @@ class IngestionService:
         return self._extract_txt(path, doc_id=doc_id, source_file=source_file)
 
     def _extract_pdf(self, path: Path, *, doc_id: str, source_file: str) -> list[ChunkRecord]:
+        fitz = import_module("fitz")
         chunks: list[ChunkRecord] = []
         with fitz.open(path) as pdf_document:
             for page_index in range(pdf_document.page_count):
@@ -94,6 +93,7 @@ class IngestionService:
         return chunks
 
     def _extract_docx(self, path: Path, *, doc_id: str, source_file: str) -> list[ChunkRecord]:
+        Document = import_module("docx").Document
         document = Document(path)
         paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
         text = "\n".join(paragraphs)

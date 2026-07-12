@@ -3,21 +3,12 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from functools import lru_cache
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 
 from app.config import Settings, settings
 from app.utils.errors import RetrievalError
-
-try:  # pragma: no cover - optional dependency fallback
-    import chromadb
-except ImportError:  # pragma: no cover - optional dependency fallback
-    chromadb = None  # type: ignore[assignment]
-
-try:  # pragma: no cover - optional dependency fallback
-    from sentence_transformers import SentenceTransformer
-except ImportError:  # pragma: no cover - optional dependency fallback
-    SentenceTransformer = None  # type: ignore[assignment]
 
 
 DEFAULT_COLLECTION_NAME = "policylens_chunks"
@@ -48,11 +39,13 @@ def _resolve_vectorstore_path() -> Path:
 
 
 @lru_cache(maxsize=4)
-def _embedding_model(model_name: str) -> SentenceTransformer | None:
-    if SentenceTransformer is None:
+def _embedding_model(model_name: str):
+    try:
+        sentence_transformers = import_module("sentence_transformers")
+    except Exception:
         return None
     try:
-        return SentenceTransformer(model_name)
+        return sentence_transformers.SentenceTransformer(model_name)
     except Exception:
         return None
 
@@ -90,7 +83,9 @@ def _distance_to_score(distance: float | None) -> float:
 
 
 def _get_collection():
-    if chromadb is None:
+    try:
+        chromadb = import_module("chromadb")
+    except Exception:
         logger.warning("retriever_path=unavailable reason=chromadb_missing")
         return None
 
