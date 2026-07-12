@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import requests
@@ -9,6 +10,9 @@ import streamlit as st
 try:
     API_BASE_URL = st.secrets["POLICYLENS_API_BASE_URL"]
 except Exception:
+    if os.getenv("STREAMLIT_SERVER_HEADLESS", "").lower() == "true":
+        st.error("Missing Streamlit secret: POLICYLENS_API_BASE_URL. Add it in Streamlit Cloud secrets.")
+        st.stop()
     API_BASE_URL = "http://localhost:8000"
 
 st.set_page_config(page_title="PolicyLens", page_icon="PL", layout="wide")
