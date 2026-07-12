@@ -38,6 +38,55 @@ def _resolve_vectorstore_path() -> Path:
     return vectorstore_path
 
 
+def inspect_chroma_state() -> dict[str, Any]:
+    vectorstore_path = _resolve_vectorstore_path()
+    path_exists = vectorstore_path.exists()
+    collection_exists: bool | None = None
+
+    logger.info(
+        "chroma_startup_state path=%s collection=%s path_exists=%s",
+        vectorstore_path,
+        DEFAULT_COLLECTION_NAME,
+        path_exists,
+    )
+
+    if not path_exists:
+        return {
+            "path": str(vectorstore_path),
+            "path_exists": False,
+            "collection_name": DEFAULT_COLLECTION_NAME,
+            "collection_exists": False,
+        }
+
+    try:
+        chromadb = import_module("chromadb")
+        client = chromadb.PersistentClient(path=str(vectorstore_path))
+        collections = client.list_collections()
+        collection_exists = any(getattr(item, "name", None) == DEFAULT_COLLECTION_NAME for item in collections)
+    except Exception as exc:
+        logger.warning(
+            "chroma_startup_state_check_failed path=%s collection=%s reason=%s",
+            vectorstore_path,
+            DEFAULT_COLLECTION_NAME,
+            exc,
+        )
+        collection_exists = None
+
+    logger.info(
+        "chroma_startup_state path=%s collection=%s path_exists=%s collection_exists=%s",
+        vectorstore_path,
+        DEFAULT_COLLECTION_NAME,
+        path_exists,
+        collection_exists,
+    )
+    return {
+        "path": str(vectorstore_path),
+        "path_exists": path_exists,
+        "collection_name": DEFAULT_COLLECTION_NAME,
+        "collection_exists": collection_exists,
+    }
+
+
 @lru_cache(maxsize=4)
 def _embedding_model(model_name: str):
     try:
@@ -90,12 +139,30 @@ def _get_collection():
         return None
 
     vectorstore_path = _resolve_vectorstore_path()
+    logger.info(
+        "retriever_chroma_lookup path=%s collection=%s path_exists=%s",
+        vectorstore_path,
+        DEFAULT_COLLECTION_NAME,
+        vectorstore_path.exists(),
+    )
     if not vectorstore_path.exists():
         logger.warning("retriever_path=unavailable vectorstore_path=%s reason=missing_directory", vectorstore_path)
         return None
 
     try:
         client = chromadb.PersistentClient(path=str(vectorstore_path))
+        collections = client.list_collections()
+        collection_exists = any(getattr(item, "name", None) == DEFAULT_COLLECTION_NAME for item in collections)
+        logger.info(
+            "retriever_collection_check path=%s collection=%s exists=%s",
+            vectorstore_path,
+            DEFAULT_COLLECTION_NAME,
+            collection_exists,
+        )
+        if not collection_exists:
+            raise RetrievalError(
+                f"Chroma collection '{DEFAULT_COLLECTION_NAME}' was not found at '{vectorstore_path}'. Run ingestion first."
+            )
         collection = client.get_collection(name=DEFAULT_COLLECTION_NAME)
         logger.debug(
             "retriever_collection_loaded path=%s collection=%s",
@@ -104,12 +171,16 @@ def _get_collection():
         )
         return collection
     except Exception as exc:
+        if isinstance(exc, RetrievalError):
+            raise
         logger.exception(
             "retriever_path=unavailable vectorstore_path=%s collection=%s reason=collection_load_failed",
             vectorstore_path,
             DEFAULT_COLLECTION_NAME,
         )
-        raise RetrievalError(f"Failed to load Chroma collection: {exc}") from exc
+        raise RetrievalError(
+            f"Failed to load Chroma collection '{DEFAULT_COLLECTION_NAME}' from '{vectorstore_path}': {exc}"
+        ) from exc
 
 
 def retrieve(query: str, top_k: int = 4, doc_id: str | None = None) -> list[dict[str, Any]]:

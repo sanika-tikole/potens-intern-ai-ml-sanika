@@ -2,11 +2,10 @@ services:
   - type: web
     name: policylens-api
     env: python
+    pythonVersion: 3.11.9
     plan: free
     autoDeploy: true
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: GROQ_API_KEY
         sync: false
     buildCommand: pip install -r requirements.txt

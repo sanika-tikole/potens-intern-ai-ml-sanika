@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 
 from app.schemas.api_models import ContradictRequest, ContradictResponse
 from app.services.contradiction_service import check_contradiction as run_contradiction_check
+from app.utils.errors import RetrievalError
 
 router = APIRouter(prefix="", tags=["contradict"])
 
@@ -13,6 +14,8 @@ router = APIRouter(prefix="", tags=["contradict"])
 def check_contradiction(payload: ContradictRequest) -> ContradictResponse:
     try:
         return run_contradiction_check(payload.doc1_id, payload.doc2_id, payload.topic)
+    except RetrievalError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except Exception as exc:
