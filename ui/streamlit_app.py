@@ -11,9 +11,13 @@ try:
     API_BASE_URL = st.secrets["POLICYLENS_API_BASE_URL"]
 except Exception:
     if os.getenv("STREAMLIT_SERVER_HEADLESS", "").lower() == "true":
-        st.error("Missing Streamlit secret: POLICYLENS_API_BASE_URL. Add it in Streamlit Cloud secrets.")
-        st.stop()
-    API_BASE_URL = "http://localhost:8000"
+        API_BASE_URL = ""
+        _missing_backend_url = True
+    else:
+        API_BASE_URL = "http://localhost:8000"
+        _missing_backend_url = False
+else:
+    _missing_backend_url = False
 
 st.set_page_config(page_title="PolicyLens", page_icon="PL", layout="wide")
 
@@ -184,9 +188,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if _missing_backend_url:
+    st.error("Missing Streamlit secret: POLICYLENS_API_BASE_URL. Add it in Streamlit Cloud secrets.")
+elif not API_BASE_URL:
+    st.warning("Backend URL is not configured.")
+
 left, right = st.columns([3, 1])
 with left:
-    st.caption(f"Backend: {API_BASE_URL}")
+    st.caption(f"Backend: {API_BASE_URL or 'not configured'}")
 with right:
     if st.button("Check Backend Status", use_container_width=True):
         try:
