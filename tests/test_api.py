@@ -29,11 +29,11 @@ def test_ask_endpoint_returns_grounded_response(monkeypatch) -> None:
     monkeypatch.setattr(ask_route, "answer_question", fake_answer_question)
 
     client = TestClient(create_app())
-    response = client.post("/ask", json={"question": "What is the leave policy?"})
+    response = client.post("/ask", json={"question": "What is the leave policy for interns?"})
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["question"] == "What is the leave policy?"
+    assert payload["question"] == "What is the leave policy for interns?"
     assert payload["answer"] == "Grounded answer"
     assert payload["language"] == "en"
     assert payload["citations"][0]["source_file"] == "policy.pdf"
@@ -69,3 +69,20 @@ def test_contradict_endpoint_returns_evidence(monkeypatch) -> None:
     assert payload["conflict"] is True
     assert payload["doc1"] == "policy_a"
     assert len(payload["evidence"]) == 2
+
+
+def test_extractive_answer_prefers_complete_sentence() -> None:
+    from app.services.qa_service import _extractive_answer, _finalize_answer
+
+    chunks = [
+        {
+            "text": "LEAVE FOR INTERNS 5.1 Interns are eligible for leave only as permitted by the applicable leave policy or",
+        },
+        {
+            "text": "9. INTERNSHIP LEAVE 9.1 Interns are eligible for 1 paid leave day per month. 9.2 Any additional leave requires approval from both the mentor and HR and may be treated as unpaid depending on internship terms.",
+        },
+    ]
+
+    answer = _extractive_answer("What is the leave policy for interns?", chunks)
+
+    assert _finalize_answer(answer, "What is the leave policy for interns?", "en") == "Interns are eligible for 1 paid leave day per month."

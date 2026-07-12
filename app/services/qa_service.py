@@ -63,6 +63,66 @@ def _is_unsupported_answer(answer: str) -> bool:
     return any(marker in lowered for marker in unsupported_markers)
 
 
+def _clean_answer_text(answer: str) -> str:
+    cleaned = re.sub(r"\s+", " ", answer).strip()
+    if not cleaned:
+        return cleaned
+
+    for _ in range(3):
+        previous = cleaned
+
+        heading_pattern = re.match(r"^(?:[A-Z][A-Z0-9\s\-–—()]+?)\s+(\d+(?:\.\d+)*\s+.*)$", cleaned)
+        if heading_pattern and heading_pattern.group(1).strip():
+            cleaned = heading_pattern.group(1).strip()
+
+        numeric_clause_pattern = re.match(r"^\d+(?:\.\d+)*\s+(.*)$", cleaned)
+        if numeric_clause_pattern and numeric_clause_pattern.group(1).strip():
+            cleaned = numeric_clause_pattern.group(1).strip()
+
+        section_pattern = re.match(r"^(?:Section|SECTION)\s+\d+(?:\.\d+)*\s*[:\-–—]?\s*(.*)$", cleaned)
+        if section_pattern and section_pattern.group(1).strip():
+            cleaned = section_pattern.group(1).strip()
+
+        if cleaned == previous:
+            break
+
+    return cleaned
+
+
+def _is_complete_extractive_sentence(sentence: str) -> bool:
+    cleaned = re.sub(r"\s+", " ", sentence).strip()
+    if not cleaned:
+        return False
+
+    if cleaned[-1] not in ".!?":
+        return False
+
+    words = re.findall(r"[a-z0-9]+", cleaned.lower())
+    if len(words) < 4:
+        return False
+
+    if words[-1] in {"or", "and", "of", "to", "for", "with", "by", "from", "in", "on", "at", "as", "per", "via"}:
+        return False
+
+    return True
+
+
+def _extractive_policy_bonus(sentence: str) -> int:
+    lowered = sentence.lower()
+    bonus = 0
+
+    if re.search(r"\beligible\b", lowered):
+        bonus += 2
+    if re.search(r"\brequires?\b", lowered) or re.search(r"\bapproval\b", lowered):
+        bonus += 2
+    if re.search(r"\bper month\b", lowered) or re.search(r"\bday(s)?\b", lowered):
+        bonus += 1
+    if re.search(r"\bmay be treated as\b", lowered) or re.search(r"\bnot allowed\b", lowered):
+        bonus += 1
+
+    return bonus
+
+
 def _translate_answer(answer: str, target_language: str) -> str:
     if target_language == "en":
         return answer
@@ -94,6 +154,7 @@ def _rewrite_answer_via_groq(answer: str, question_en: str, target_language: str
 
 
 def _finalize_answer(answer: str, question_en: str, original_language: str) -> str:
+    answer = _clean_answer_text(answer)
     if original_language == "en":
         return answer.strip()
 
@@ -125,8 +186,10 @@ def _extractive_answer(question: str, retrieved_chunks: list[dict[str, object]])
         for token in re.findall(r"[a-z0-9]+", question.lower())
         if len(token) > 2
     }
-    best_sentence = ""
-    best_score = 0
+    best_complete_sentence = ""
+    best_complete_score = 0
+    best_incomplete_sentence = ""
+    best_incomplete_score = 0
 
     for chunk in retrieved_chunks:
         text = str(chunk.get("text", "")).strip()
@@ -143,12 +206,16 @@ def _extractive_answer(question: str, retrieved_chunks: list[dict[str, object]])
             }
             overlap = len(question_terms & sentence_terms)
             numeric_bonus = 1 if re.search(r"\d", cleaned_sentence) else 0
-            score = overlap * 2 + numeric_bonus
-            if score > best_score:
-                best_score = score
-                best_sentence = cleaned_sentence
+            score = overlap * 2 + numeric_bonus + _extractive_policy_bonus(cleaned_sentence)
+            if _is_complete_extractive_sentence(cleaned_sentence):
+                if score > best_complete_score:
+                    best_complete_score = score
+                    best_complete_sentence = cleaned_sentence
+            elif score > best_incomplete_score:
+                best_incomplete_score = score
+                best_incomplete_sentence = cleaned_sentence
 
-    return best_sentence
+    return best_complete_sentence or best_incomplete_sentence
 
 
 def _chunk_relevance_score(question: str, chunk: dict[str, object]) -> int:
@@ -223,9 +290,13 @@ def answer_question(question: str) -> AskResponse:
         return AskResponse(question=validated_question, answer=fallback, language=original_language, confidence=None, citations=[])
 
     extractive_answer = _extractive_answer(question_en, retrieved_chunks[:2])
-    if extractive_answer:
+    if extractive_answer and _is_complete_extractive_sentence(extractive_answer):
         logger.info("ask_service_path=extractive_first reason=top_chunks_have_direct_answer")
         answer = _finalize_answer(extractive_answer, question_en, original_language)
+        if _is_unsupported_answer(answer) or not answer.strip():
+            logger.info("ask_service_path=fallback reason=extractive_answer_invalid_after_finalize")
+            fallback = SAFE_FALLBACKS.get(original_language, SAFE_FALLBACKS["en"])
+            return AskResponse(question=validated_question, answer=fallback, language=original_language, confidence=_calculate_confidence(retrieved_chunks), citations=make_citations(retrieved_chunks))
         logger.debug("ask_service_final_answer preview=%s", answer[:1500])
         citations = make_citations(retrieved_chunks)
         logger.debug("ask_service_returned_citations=%s", citations)
@@ -263,7 +334,7 @@ def answer_question(question: str) -> AskResponse:
 
     if _is_unsupported_answer(answer_en):
         extractive_answer = _extractive_answer(question_en, retrieved_chunks)
-        if extractive_answer:
+        if extractive_answer and _is_complete_extractive_sentence(extractive_answer):
             logger.info("ask_service_path=extractive_rewrite reason=llm_empty_or_unsupported")
             answer = _finalize_answer(extractive_answer, question_en, original_language)
             logger.debug("ask_service_final_answer preview=%s", answer[:1500])
@@ -289,6 +360,21 @@ def answer_question(question: str) -> AskResponse:
 
     logger.info("ask_service_path=llm_answer")
     answer = _finalize_answer(answer_en, question_en, original_language)
+    if _is_unsupported_answer(answer) or not answer.strip():
+        extractive_answer = _extractive_answer(question_en, retrieved_chunks)
+        if extractive_answer and _is_complete_extractive_sentence(extractive_answer):
+            logger.info("ask_service_path=extractive_rewrite reason=llm_answer_invalid_after_finalize")
+            answer = _finalize_answer(extractive_answer, question_en, original_language)
+        else:
+            logger.info("ask_service_path=fallback reason=llm_answer_invalid_after_finalize")
+            fallback = SAFE_FALLBACKS.get(original_language, SAFE_FALLBACKS["en"])
+            return AskResponse(
+                question=validated_question,
+                answer=fallback,
+                language=original_language,
+                confidence=_calculate_confidence(retrieved_chunks),
+                citations=make_citations(retrieved_chunks),
+            )
     logger.debug("ask_service_final_answer preview=%s", answer[:1500])
     citations = make_citations(retrieved_chunks)
     logger.debug("ask_service_returned_citations=%s", citations)
